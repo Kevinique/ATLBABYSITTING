@@ -1,0 +1,209 @@
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+
+const babysitters = [
+  "Adderley, Stephanie",
+  "Adderley, Turkessa",
+  "Bates, Janet",
+  "Black, Tamara",
+  "Bowe, Obiecheryl",
+  "Brice Francina",
+  "Burrows, Keva",
+  "Campbell, Deborah",
+  "Cleare, Kenya",
+  "Cunningham, Deja",
+  "Dames, Sasha",
+  "Delancy, Nethera",
+  "Earn, Ella",
+  "Earns, Elva",
+  "Forbes, Catherine",
+  "Gibson, Sandra",
+  "Gibson, Sophia",
+  "Hamilton, Zainab",
+  "Johnson, Mildred",
+  "Knowles, Leanadia",
+  "Lightbourne, Omarra",
+  "Mayne, Charisma",
+  "Miller, Shabricca",
+  "Morley, Suzette",
+  "Musgrove, Kay",
+  "Richards, Carletta",
+  "Rolle, Tamika",
+  "Stuart Bain, Roselda",
+  "Styles, Monalisa",
+  "Thompson, Barbara",
+  "White-Miller, Nacoya",
+];
+
+function Home() {
+  return (
+    <Card className="w-full max-w-2xl mb-6 bg-purple-200">
+      <CardContent>
+        <h1 className="text-2xl font-bold text-center mb-4 text-purple-800">Atlantis Babysitting Availability Tracker</h1>
+        <p className="text-center text-purple-700">
+          This site was designed with our Guest and You in mind. It will allow for better communication and scheduling!
+          The purpose is that you would enter your availability and Off/fixed days.
+        </p>
+        <div className="text-center mt-4">
+          <Link to="/login" className="text-purple-600 underline">Get Started</Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Login() {
+  return (
+    <Card className="w-full max-w-md mb-6 bg-pink-200">
+      <CardContent>
+        <h2 className="text-xl font-bold mb-4 text-center text-pink-800">Sign In</h2>
+        <Input type="text" placeholder="Username" className="mb-4 bg-pink-50" />
+        <Input type="password" placeholder="Password" className="mb-4 bg-pink-50" />
+        <Button className="w-full bg-purple-500 text-white hover:bg-purple-600">
+          <Link to="/babysitter-selection">Sign In</Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function BabysitterSelection({ setSelectedBabysitter }) {
+  return (
+    <Card className="w-full max-w-2xl mb-6 bg-purple-200">
+      <CardContent>
+        <h2 className="text-xl font-bold mb-4 text-center text-purple-800">Select Babysitter</h2>
+        <Select onValueChange={(value) => setSelectedBabysitter(value)}>
+          <SelectTrigger className="w-full bg-purple-50">
+            <SelectValue placeholder="Choose a babysitter" />
+          </SelectTrigger>
+          <SelectContent>
+            {babysitters.map((name, index) => (
+              <SelectItem key={index} value={name}>
+                {name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="text-center mt-4">
+          <Link to="/calendar" className="text-purple-600 underline">Proceed to Calendar</Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function CalendarPage({ selectedBabysitter, availability, setAvailability }) {
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [comment, setComment] = useState("");
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+  };
+
+  const saveAvailability = () => {
+    if (selectedBabysitter && selectedDate) {
+      setAvailability((prev) => ({
+        ...prev,
+        [selectedBabysitter]: {
+          ...(prev[selectedBabysitter] || {}),
+          [selectedDate]: comment,
+        },
+      }));
+      setComment("");
+      alert("Availability saved successfully!");
+    } else {
+      alert("Please select a babysitter and a date.");
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-2xl mb-6 bg-pink-200">
+      <CardContent>
+        <h2 className="text-xl font-bold mb-4 text-center text-pink-800">Set Availability</h2>
+        <Calendar
+          onDateClick={(date) => handleDateSelect(date)}
+          selectedDate={selectedDate}
+        />
+        {selectedDate && (
+          <p className="mt-4 text-center text-pink-700">Selected Date: {selectedDate}</p>
+        )}
+        <Input
+          type="text"
+          placeholder="Add a comment (optional)"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          className="mb-4 bg-pink-50"
+        />
+        <Button className="w-full bg-purple-500 text-white hover:bg-purple-600" onClick={saveAvailability}>Save Availability</Button>
+        <div className="text-center mt-4">
+          <Link to="/overview" className="text-purple-600 underline">View Overview</Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Overview({ availability }) {
+  return (
+    <Card className="w-full max-w-2xl bg-purple-200">
+      <CardContent>
+        <h2 className="text-xl font-bold mb-4 text-center text-purple-800">Availability Overview</h2>
+        {Object.keys(availability).length > 0 ? (
+          <div>
+            {Object.entries(availability).map(([name, dates], index) => (
+              <div key={index} className="mb-4">
+                <h3 className="font-bold text-purple-800">{name}</h3>
+                <ul className="list-disc list-inside text-purple-700">
+                  {Object.entries(dates).map(([date, note], idx) => (
+                    <li key={idx}>
+                      {date}: {note || "No comment"}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-purple-700">No availability set yet.</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function App() {
+  const [selectedBabysitter, setSelectedBabysitter] = useState("");
+  const [availability, setAvailability] = useState({});
+
+  return (
+    <Router>
+      <div className="min-h-screen bg-gradient-to-b from-purple-100 to-pink-100 flex flex-col items-center p-4">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/babysitter-selection"
+            element={<BabysitterSelection setSelectedBabysitter={setSelectedBabysitter} />}
+          />
+          <Route
+            path="/calendar"
+            element={<CalendarPage
+              selectedBabysitter={selectedBabysitter}
+              availability={availability}
+              setAvailability={setAvailability}
+            />}
+          />
+          <Route
+            path="/overview"
+            element={<Overview availability={availability} />}
+          />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
